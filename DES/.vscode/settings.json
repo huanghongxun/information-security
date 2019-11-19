@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "permutation.h": "c",
+        "des.h": "c",
+        "des_def.h": "c",
+        "stdint.h": "c",
+        "tables.h": "c",
+        "assert.h": "c",
+        "binary.h": "c",
+        "string.h": "c"
+    }
+}
