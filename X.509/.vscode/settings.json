@@ -1,0 +1,22 @@
+{
+    "files.associations": {
+        "stddef.h": "c",
+        "binary.h": "c",
+        "stdlib.h": "c",
+        "md5.h": "c",
+        "string.h": "c",
+        "scanner.h": "c",
+        "parser.h": "c",
+        "ast.h": "c",
+        "stdbool.h": "c",
+        "defs.h": "c",
+        "string_util.h": "c",
+        "ctype.h": "c",
+        "asn.h": "c",
+        "oid.h": "c",
+        "cstdbool": "c",
+        "c++config.h": "c",
+        "trie.h": "c",
+        "stdio.h": "c"
+    }
+}
