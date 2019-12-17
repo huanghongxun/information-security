@@ -9,6 +9,7 @@
 #define AST_VALUE_STRING 2
 #define AST_VALUE_STRUCT 3
 #define AST_VALUE_BYTE_ARRAY 4
+#define AST_VALUE_BIT_ARRAY 5
 
 typedef struct tiny_ast_s
 {
@@ -40,6 +41,7 @@ void tiny_free_int_ast(tiny_ast_t *);
 
 typedef struct tiny_data_ast_s
 {
+    int padding;
     int length;
     void *value;
     tiny_ast_t ast;
@@ -51,6 +53,7 @@ typedef struct tiny_data_ast_s
         error("tiny_make_data_ast failed");                 \
     tiny_init_ast(&ast->ast, desc);                         \
     ast->ast.value_type = valuetype;                        \
+    ast->padding = 0;                                       \
     ast->ast.free = tiny_free_data_ast
 void tiny_free_data_ast(tiny_ast_t *);
 

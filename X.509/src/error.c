@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <errno.h>
+#include <stdlib.h>
 
 void error(const char *format, ...)
 {

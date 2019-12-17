@@ -3,7 +3,7 @@
 
 struct trie *OID_trie;
 
-const char *OID[][3] = {
+OID_entry_t OID[] = {
 	{ "0.2.262.1.10", "Telesec", "Deutsche Telekom" },
 	{ "0.2.262.1.10.0", "extension", "Telesec" },
 	{ "0.2.262.1.10.1", "mechanism", "Telesec" },
@@ -1143,9 +1143,9 @@ const char *OID[][3] = {
 	{ "1.3.6.1.4.1.311.47.1.3", "systemHealthLoophole", "Microsoft extended key usage" },
 	{ "1.3.6.1.4.1.311.60.1.1", "rootProgramFlags", "Microsoft policy attribute" },
 	{ "1.3.6.1.4.1.311.61.1.1", "kernelModeCodeSigning", "Microsoft enhanced key usage" },
-	{ "1.3.6.1.4.1.311.60.2.1.1", "jurisdictionOfIncorporationL", "Microsoft (???)" },
-	{ "1.3.6.1.4.1.311.60.2.1.2", "jurisdictionOfIncorporationSP", "Microsoft (???)" },
-	{ "1.3.6.1.4.1.311.60.2.1.3", "jurisdictionOfIncorporationC", "Microsoft (???)" },
+	{ "1.3.6.1.4.1.311.60.2.1.1", "jurisdictionOfIncorporationL", "Microsoft" },
+	{ "1.3.6.1.4.1.311.60.2.1.2", "jurisdictionOfIncorporationSP", "Microsoft" },
+	{ "1.3.6.1.4.1.311.60.2.1.3", "jurisdictionOfIncorporationC", "Microsoft" },
 	{ "1.3.6.1.4.1.311.88", "capiCom", "Microsoft attribute" },
 	{ "1.3.6.1.4.1.311.88.1", "capiComVersion", "Microsoft attribute" },
 	{ "1.3.6.1.4.1.311.88.2", "capiComAttribute", "Microsoft attribute" },

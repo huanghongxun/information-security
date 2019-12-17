@@ -3,9 +3,12 @@
 
 #include "trie.h"
 
-extern const char *OID[][3];
+typedef const char *(OID_entry_t)[3];
+typedef OID_entry_t *OID_entry_p;
 
-// OID_trie: map<string, const char *(*)[3]>
+extern OID_entry_t OID[];
+
+// OID_trie: map<string, OID_entry_t *>
 // from OID key to OID entry
 extern struct trie *OID_trie;
 

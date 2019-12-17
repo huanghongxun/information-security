@@ -310,7 +310,28 @@ tiny_parser_t *tiny_make_parser_token_eof()
     return ret;
 }
 
-static tiny_parser_result_t parser_action(tiny_parser_ctx_t ctx, tiny_scanner_t *scanner)
+static tiny_parser_result_t parser_preaction(tiny_parser_ctx_t ctx, tiny_scanner_t *scanner)
+{
+    void (*action)() = ctx.current_parser->func;
+    action();
+
+    tiny_parser_result_t next = tiny_syntax_parse(
+        tiny_syntax_make_context(ctx.parsers, ctx.current_parser->child, 0, -1),
+        scanner);
+
+    return next;
+}
+
+tiny_parser_t *tiny_make_parser_preaction(tiny_parser_t *parser, void (*action)(tiny_ast_t *))
+{
+    tiny_parser_t *ret = tiny_make_parser();
+    ret->parser = parser_preaction;
+    ret->child = parser;
+    ret->func = action;
+    return ret;
+}
+
+static tiny_parser_result_t parser_postaction(tiny_parser_ctx_t ctx, tiny_scanner_t *scanner)
 {
     tiny_parser_result_t next = tiny_syntax_parse(
         tiny_syntax_make_context(ctx.parsers, ctx.current_parser->child, 0, -1),
@@ -323,10 +344,10 @@ static tiny_parser_result_t parser_action(tiny_parser_ctx_t ctx, tiny_scanner_t 
     return next;
 }
 
-tiny_parser_t *tiny_make_parser_action(tiny_parser_t *parser, void (*action)(tiny_ast_t *))
+tiny_parser_t *tiny_make_parser_postaction(tiny_parser_t *parser, void (*action)(tiny_ast_t *))
 {
     tiny_parser_t *ret = tiny_make_parser();
-    ret->parser = parser_action;
+    ret->parser = parser_postaction;
     ret->child = parser;
     ret->func = action;
     return ret;

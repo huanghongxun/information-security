@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <string.h>
 #include "asn.h"
 #include "oid.h"
 #include "error.h"
-#include "syntax_def.h"
+#include "x509.h"
 
 #define BUF_SIZE 1024
 
@@ -109,7 +110,7 @@ int main(int argc, char *argv[])
     if (strcmp(argv[1], "ASN") == 0)
     {
         tiny_parser_ctx_t ctx;
-        ctx.current_parser = ASN_PARSER_TLV;
+        ctx.current_parser = ASN_PARSER_ANY;
         tiny_parser_result_t result = tiny_syntax_parse(ctx, &scanner);
         if (result.state == 0)
         {
@@ -128,11 +129,11 @@ int main(int argc, char *argv[])
         tiny_parser_result_t result = tiny_syntax_parse(ctx, &scanner);
         if (result.state == 0)
         {
-            print_ast(result.ast, 0, stdout);
+            // print_ast(result.ast, 0, stdout);
         }
         else
         {
-            error("Failed to parse certificate");
+            error("Failed to parse certificate: %x", result.state);
         }
     }
     else

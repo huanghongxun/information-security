@@ -17,6 +17,7 @@
         "cstdbool": "c",
         "c++config.h": "c",
         "trie.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "syntax_def.h": "c"
     }
 }

@@ -1,5 +1,6 @@
 #include "ast.h"
 #include <stdlib.h>
+#include "error.h"
 
 void tiny_ast_add_child(tiny_ast_t *ast, tiny_ast_t *child)
 {

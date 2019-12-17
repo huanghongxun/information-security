@@ -22,7 +22,11 @@
 // 匹配指定字符
 #define TOKEN_PREDICATE(predicate) tiny_make_parser_token_predicate(predicate)
 // 在产生 AST 后执行操作
-#define ACTOIN(parser, action) tiny_make_parser_action(parser, action)
+#define POST_ACTION(parser, action) tiny_make_parser_postaction(parser, action)
+// 在产生 AST 前执行操作
+#define PRE_ACTION(parser, action) tiny_make_parser_preaction(parser, action)
+// 在产生 AST 前后执行操作
+#define ACTION(preaction, parser, postaction) POST_ACTION(PRE_ACTION(parser, preaction), postaction)
 // 表示丢弃产生式 parser 所产生的语法树
 #define ELIMINATE(parser) tiny_make_parser_eliminate(parser)
 
@@ -73,7 +77,8 @@ tiny_parser_t *tiny_make_parser_grammar(const char *name);
 tiny_parser_t *tiny_make_parser_optional(tiny_parser_t *optional);
 tiny_parser_t *tiny_make_parser_token_eof();
 tiny_parser_t *tiny_make_parser_token_predicate(bool (*predicate)(uint8_t));
-tiny_parser_t *tiny_make_parser_action(tiny_parser_t *parser, void (*action)(tiny_ast_t *));
+tiny_parser_t *tiny_make_parser_preaction(tiny_parser_t *parser, void (*action)());
+tiny_parser_t *tiny_make_parser_postaction(tiny_parser_t *parser, void (*action)(tiny_ast_t *));
 tiny_parser_t *tiny_make_parser_eliminate(tiny_parser_t *parser);
 
 void tiny_syntax_next_token(tiny_parser_ctx_t *machine, tiny_lex_token_t token);

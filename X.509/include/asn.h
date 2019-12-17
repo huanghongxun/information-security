@@ -40,6 +40,7 @@
 #define ASN_PARSER_EOC                  asn_make_parser_skip(ASN_TAG_EOC)
 #define ASN_PARSER_BOOLEAN              asn_make_parser_integer(ASN_TAG_BOOLEAN)
 #define ASN_PARSER_INTEGER              asn_make_parser_integer(ASN_TAG_INTEGER)
+#define ASN_PARSER_BIG_INTEGER          asn_make_parser_bytes(ASN_TAG_INTEGER)
 #define ASN_PARSER_BIT_STRING           asn_make_parser_bits(ASN_TAG_BIT_STRING)
 #define ASN_PARSER_OCTET_STRING         asn_make_parser_bytes(ASN_TAG_OCTET_STRING)
 #define ASN_PARSER_NULL                 asn_make_parser_skip(ASN_TAG_NULL)
@@ -52,8 +53,8 @@
 #define ASN_PARSER_UTF8_STRING          asn_make_parser_skip(ASN_TAG_UTF8_STRING)
 #define ASN_PARSER_MATCH_SEQUENCE(...)  asn_make_parser_match_sequence(ASN_TAG_SEQUENCE, PP_NARG(__VA_ARGS__), __VA_ARGS__)
 #define ASN_PARSER_MATCH_SET(...)       asn_make_parser_match_sequence(ASN_TAG_SET, PP_NARG(__VA_ARGS__), __VA_ARGS__)
-#define ASN_PARSER_SEQUENCE             asn_make_parser_sequence(ASN_TAG_SEQUENCE, ASN_PARSER_TLV)
-#define ASN_PARSER_SET                  asn_make_parser_sequence(ASN_TAG_SET, ASN_PARSER_TLV)
+#define ASN_PARSER_SEQUENCE             asn_make_parser_sequence(ASN_TAG_SEQUENCE, ASN_PARSER_ANY)
+#define ASN_PARSER_SET                  asn_make_parser_sequence(ASN_TAG_SET, ASN_PARSER_ANY)
 #define ASN_PARSER_SEQUENCE_OF(parser)  asn_make_parser_sequence(ASN_TAG_SEQUENCE, parser)
 #define ASN_PARSER_SET_OF(parser)       asn_make_parser_sequence(ASN_TAG_SET, parser)
 #define ASN_PARSER_NUMERIC_STRING       asn_make_parser_bytes(ASN_TAG_NUMERIC_STRING)
@@ -101,6 +102,6 @@ tiny_parser_t *asn_make_parser_tlv(int class, uint8_t tag, tiny_parser_t *);
 void asn_parser_init();
 const char *find_parser_name_by_tag(uint8_t tag);
 
-extern tiny_parser_t *ASN_PARSER_TLV;
+extern tiny_parser_t *ASN_PARSER_ANY;
 
 #endif // ASN_H

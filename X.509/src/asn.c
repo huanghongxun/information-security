@@ -6,8 +6,9 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <ctype.h>
 
-tiny_parser_t *ASN_PARSER_TLV;
+tiny_parser_t *ASN_PARSER_ANY;
 
 static tiny_parser_t *find_parser_by_tag(uint8_t tag)
 {
@@ -40,8 +41,8 @@ static tiny_parser_t *find_parser_by_tag(uint8_t tag)
         case ASN_TAG_GENERAL_STRING: return ASN_PARSER_GENERAL_STRING; break;
         case ASN_TAG_UNIVERSAL_STRING: return ASN_PARSER_UNIVERSAL_STRING; break;
         case ASN_TAG_BMP_STRING: return ASN_PARSER_BMP_STRING; break;
-        default: return NULL;
     }
+    return NULL;
 }
 
 const char *find_parser_name_by_tag(uint8_t tag)
@@ -74,8 +75,8 @@ const char *find_parser_name_by_tag(uint8_t tag)
         case ASN_TAG_GENERAL_STRING: return "GENERAL_STRING"; break;
         case ASN_TAG_UNIVERSAL_STRING: return "UNIVERSAL_STRING"; break;
         case ASN_TAG_BMP_STRING: return "BMP_STRING"; break;
-        default: return NULL;
     }
+    return NULL;
 }
 
 asn_tag_t parse_asn_tag(tiny_scanner_t *scanner)
@@ -104,7 +105,6 @@ fail:
 
 static tiny_parser_result_t parser_sequence(tiny_parser_ctx_t ctx, tiny_scanner_t *scanner)
 {
-    puts("sequence");
     tiny_ast_t *ast = tiny_make_ast(ASN_TAG_SEQUENCE);
     tiny_scanner_token_t *save = tiny_scanner_now(scanner);
 
@@ -152,9 +152,9 @@ static tiny_parser_result_t parser_asn_bytes(tiny_parser_ctx_t ctx, tiny_scanner
 {
     if (false) {
         puts("trying constructed");
-        tiny_scanner_t *now = tiny_scanner_now(scanner);
+        tiny_scanner_token_t *now = tiny_scanner_now(scanner);
 
-        tiny_parser_t *parser = asn_make_raw_parser_sequence(ASN_PARSER_TLV);
+        tiny_parser_t *parser = asn_make_raw_parser_sequence(ASN_PARSER_ANY);
         tiny_parser_result_t next = tiny_syntax_parse(
             tiny_syntax_make_context(ctx.parsers, parser, 0, ctx.length),
             scanner);
@@ -201,7 +201,7 @@ static int parse_int(const char *s, const char *e)
     return result;
 }
 
-static void parse_time(const char *time, bool shortYear, const char *out)
+static void parse_time(const char *time, bool shortYear, char *out)
 {
     int year, month, day, hour, minute = 0, second = 0, microsecond = 0, d, zoneMonth = 0, zoneMinute = 0;
     if (shortYear)
@@ -245,7 +245,7 @@ static void parse_time(const char *time, bool shortYear, const char *out)
 
 static tiny_parser_result_t parser_asn_utc_time(tiny_parser_ctx_t ctx, tiny_scanner_t *scanner)
 {
-    uint8_t str[ctx.length + 1];
+    char str[ctx.length + 1];
     tiny_lex_token_t token;
 
     str[ctx.length] = 0;
@@ -256,7 +256,7 @@ static tiny_parser_result_t parser_asn_utc_time(tiny_parser_ctx_t ctx, tiny_scan
         str[i] = token.byte;
     }
 
-    uint8_t *result = malloc(128);
+    char *result = malloc(128);
     if (!result) error("parser_asn_utc_time failed");
     parse_time(str, true, result);
     
@@ -279,7 +279,7 @@ tiny_parser_t *asn_make_parser_utc_time(uint8_t tag)
 
 static tiny_parser_result_t parser_asn_generalized_time(tiny_parser_ctx_t ctx, tiny_scanner_t *scanner)
 {
-    uint8_t str[ctx.length + 1];
+    char str[ctx.length + 1];
     tiny_lex_token_t token;
 
     str[ctx.length] = 0;
@@ -290,7 +290,7 @@ static tiny_parser_result_t parser_asn_generalized_time(tiny_parser_ctx_t ctx, t
         str[i] = token.byte;
     }
 
-    uint8_t *result = malloc(128);
+    char *result = malloc(128);
     if (!result) error("parser_asn_generalized_time failed");
     parse_time(str, false, result);
     
@@ -315,35 +315,34 @@ static tiny_parser_result_t parser_asn_bits(tiny_parser_ctx_t ctx, tiny_scanner_
 {
     tiny_lex_token_t token = tiny_scanner_next(scanner);
     if (token.error) return tiny_syntax_make_failure_result(token, 0, token.error);
-    int unused_bits = token.byte, len = ctx.length * 8 - unused_bits, c = 0;
+    int unused_bits = token.byte;
 
-    if (!unused_bits)
+    /*if (!unused_bits)
     {
-        tiny_scanner_t *now = tiny_scanner_now(scanner);
-        tiny_parser_t *parser = asn_make_raw_parser_sequence(ASN_PARSER_TLV);
+        tiny_scanner_token_t *now = tiny_scanner_now(scanner);
+        tiny_parser_t *parser = asn_make_raw_parser_sequence(ASN_PARSER_ANY);
         tiny_parser_result_t next = tiny_syntax_parse(
             tiny_syntax_make_context(ctx.parsers, parser, 0, ctx.length - 1),
             scanner);
         free(parser);
         if (next.state == 0) return next;
         else tiny_scanner_reset(scanner, now);
-    }
+    }*/
 
-    uint8_t *str = malloc(sizeof(uint8_t) * (len + 1));
+    uint8_t *str = malloc(sizeof(uint8_t) * ctx.length);
     if (!str) error("parser_asn_bits failed");
-    str[len] = 0;
+    str[ctx.length] = 0;
 
     for (int i = 1; i < ctx.length; ++i)
     {
         token = tiny_scanner_next(scanner);
         if (token.error) goto fail;
-        int skip = i + 1 == ctx.length ? unused_bits : 0;
-        for (int j = 7; j >= skip; --j)
-            str[c++] = token.byte >> j ? '1' : '0';
+        str[i - 1] = token.byte;
     }
     
-    tiny_make_data_ast(ast, 0, AST_VALUE_STRING);
-    ast->length = len;
+    tiny_make_data_ast(ast, 0, AST_VALUE_BIT_ARRAY);
+    ast->padding = unused_bits;
+    ast->length = ctx.length - 1;
     ast->value = str;
     return tiny_syntax_make_success_result(&ast->ast);
 fail:
@@ -553,7 +552,7 @@ static tiny_parser_result_t parser_tlv(tiny_parser_ctx_t ctx, tiny_scanner_t *sc
         length = length_byte.byte;
     }
 
-    printf("%x %x %x %d %p\n", tag.class, tag.constructed, tag.number, length, ctx.current_parser->child);
+    // printf("%x %x %x %ld %p\n", tag.class, tag.constructed, tag.number, length, ctx.current_parser->child);
 
     tiny_parser_result_t result;
 
@@ -568,7 +567,7 @@ static tiny_parser_result_t parser_tlv(tiny_parser_ctx_t ctx, tiny_scanner_t *sc
         }
         else if (tag.constructed)
         {
-            tiny_parser_t *parser = asn_make_raw_parser_sequence(ASN_PARSER_TLV);
+            tiny_parser_t *parser = asn_make_raw_parser_sequence(ASN_PARSER_ANY);
             result = tiny_syntax_parse(
                 tiny_syntax_make_context(ctx.parsers, parser, tag.number, length),
                 scanner);
@@ -613,5 +612,5 @@ tiny_parser_t *asn_make_parser_tlv(int class, uint8_t tag, tiny_parser_t *child)
 
 void asn_parser_init()
 {
-    ASN_PARSER_TLV = asn_make_parser_tlv(-1, 0, NULL);
+    ASN_PARSER_ANY = asn_make_parser_tlv(-1, 0, NULL);
 }
